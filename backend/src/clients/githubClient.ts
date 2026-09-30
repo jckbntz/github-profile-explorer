@@ -26,5 +26,5 @@ async function request<T>(path: string): Promise<T> {
 export const githubClient = {
   getUser: (username: string) => request<GitHubUser>(`/users/${encodeURIComponent(username)}`),
   getRepos: (username: string) =>
-    request<GitHubRepo[]>(`/users/${encodeURIComponent(username)}/repos?per_page=3&sort=updated`),
+    request<GitHubRepo[]>(`/users/${encodeURIComponent(username)}/repos?per_page=100&sort=updated`),
 };
