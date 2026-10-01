@@ -1,7 +1,10 @@
 import { githubClient } from "../clients/githubClient";
 import type { Profile } from "../types/profile";
+import { TtlCache } from "../utils/cache";
 
-export async function getProfile(username: string): Promise<Profile> {
+const cache = new TtlCache<Profile>(5 * 60 * 1000);
+
+async function fetchProfile(username: string): Promise<Profile> {
   const [user, rawRepos] = await Promise.all([
     githubClient.getUser(username),
     githubClient.getRepos(username),
@@ -48,4 +51,14 @@ export async function getProfile(username: string): Promise<Profile> {
       topLanguages,
     },
   };
+}
+
+export async function getProfile(username: string): Promise<Profile> {
+  const key = username.toLowerCase();
+  const hit = cache.get(key);
+  if (hit) return hit;
+
+  const profile = await fetchProfile(username);
+  cache.set(key, profile);
+  return profile;
 }
