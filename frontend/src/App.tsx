@@ -1,35 +1,37 @@
 import { useState } from "react";
 import { useProfile } from "./hooks/useProfile";
+import StatusMessage from "./components/StatusMessage";
+import SearchBar from "./components/SearchBar";
+import { ProfileCard } from "./components/ProfileCard";
+import { RepoList } from "./components/RepoList";
 
 function App() {
-  const [input, setInput] = useState("");
   const [username, setUsername] = useState("");
-  const { data, error, isFetching } = useProfile(username);
+
+  const { data, error, isLoading } = useProfile(username);
 
   return (
-    <main>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
+    <main className="app">
+      <header className="app__header">
+        <h1>gh-explorer</h1>
+        <span className="muted">// github profile explorer</span>
+      </header>
 
-          setUsername(input.trim());
-        }}>
-        <input
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-          }}
-          placeholder="GitHub username"
-        />
+      <SearchBar onSearch={setUsername} disabled={isLoading} />
 
-        <button>Search</button>
-      </form>
+      {!username && <StatusMessage>enter a username to begin</StatusMessage>}
 
-      {isFetching && <p>Loading...</p>}
+      {isLoading && <StatusMessage kind="loading">fetching {username}...</StatusMessage>}
 
-      {error && <p>{error.message}</p>}
+      {error && <StatusMessage kind="error">{error.message}</StatusMessage>}
 
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+      {data && (
+        <>
+          <ProfileCard profile={data} />
+
+          <RepoList repos={data.repos} />
+        </>
+      )}
     </main>
   );
 }
