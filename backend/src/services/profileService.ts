@@ -2,16 +2,30 @@ import { githubClient } from "../clients/githubClient";
 import type { Profile } from "../types/profile";
 import { TtlCache } from "../utils/cache";
 
+const PER_PAGE = 100;
+const MAX_PAGES = 10;
+
 const cache = new TtlCache<Profile>(5 * 60 * 1000);
 
+async function fetchAllRepos(username: string, publicRepos: number) {
+  const totalPages = Math.ceil(publicRepos / PER_PAGE);
+
+  const pagesToFetch = Math.min(totalPages, MAX_PAGES);
+
+  const results = await Promise.all(
+    Array.from({ length: pagesToFetch }, (_, i) => githubClient.getRepos(username, i + 1)),
+  );
+
+  return results.flat();
+}
+
 async function fetchProfile(username: string): Promise<Profile> {
-  const [user, rawRepos] = await Promise.all([
-    githubClient.getUser(username),
-    githubClient.getRepos(username),
-  ]);
+  const user = await githubClient.getUser(username);
+
+  const rawRepos = await fetchAllRepos(username, user.public_repos);
 
   const repos = rawRepos
-    .filter((r) => !r.fork)
+    .filter((r) => !r.fork) // don't include forks
     .map((r) => ({
       id: r.id,
       name: r.name,
