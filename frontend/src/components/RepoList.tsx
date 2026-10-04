@@ -4,7 +4,8 @@ import { RepoControls } from "./RepoControls";
 import StatusMessage from "./StatusMessage";
 
 export function RepoList({ repos }: { repos: Repo[] }) {
-  const { visible, sort, setSort, language, setLanguage, languages } = useRepoView(repos);
+  const { visible, shown, hasMore, showMore, sort, setSort, language, setLanguage, languages } =
+    useRepoView(repos);
 
   if (repos.length === 0) {
     return <StatusMessage>no original repositories</StatusMessage>;
@@ -27,8 +28,8 @@ export function RepoList({ repos }: { repos: Repo[] }) {
       </div>
 
       <ul className="repos">
-        {visible.map((r) => (
-          <li className="card repo" key={r.id}>
+        {shown.map((r) => (
+          <li key={r.id} className="card repo">
             <a href={r.url} target="_blank" rel="noreferrer">
               {r.name}
             </a>
@@ -45,6 +46,12 @@ export function RepoList({ repos }: { repos: Repo[] }) {
             </div>
           </li>
         ))}
+
+        {hasMore && (
+          <button className="more" onClick={showMore}>
+            show more ({visible.length - shown.length} remaining)
+          </button>
+        )}
       </ul>
     </section>
   );
