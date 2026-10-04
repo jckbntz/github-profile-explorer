@@ -29,7 +29,7 @@ function App() {
         <>
           <ProfileCard profile={data} />
 
-          <RepoList repos={data.repos} />
+          <RepoList key={data.user.name} repos={data.repos} />
         </>
       )}
     </main>
