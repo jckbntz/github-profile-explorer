@@ -1,4 +1,5 @@
 backend/src/**/*.test.ts
+frontend/src/**/*.test.ts
 
 # dotenv environment variable files
 .env
